@@ -10,7 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-from decouple import config
+import os
+from decouple import Csv, config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,11 +27,13 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=[], cast=Csv())
+
+INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
 VAT_API = config('VAT_API', default='https://api.vatcomply.com')
-DEFAULT_CURRENCY = config('DEFAULT_CURRENCY', default='USD')
 
+DEFAULT_CURRENCY = config('DEFAULT_CURRENCY', default='USD')
 
 # Application definition
 
@@ -130,6 +133,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
+
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = 'static/'
 
 # Default primary key field type
