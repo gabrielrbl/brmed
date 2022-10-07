@@ -1,8 +1,10 @@
+from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import render
 from django.http import HttpResponse
 import pandas as pd
 from cotacao.utils import VATApi
-from cotacao.models import Currency
+from cotacao.models import Currency, Rate
+from cotacao.serializers import CurrencySerializer, RateSerializer
 
 
 def home(request):
@@ -51,3 +53,15 @@ def home(request):
         context['data'] = data
 
     return render(request, 'home.html', context)
+
+
+class CurrencyViewSet(ModelViewSet):
+    """API endpoint that allows currencies to be viewed or edited."""
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer
+
+
+class RateViewSet(ModelViewSet):
+    """API endpoint that allows rates to be viewed or edited."""
+    queryset = Rate.objects.all()
+    serializer_class = RateSerializer
