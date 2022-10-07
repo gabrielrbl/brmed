@@ -1,23 +1,15 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-
 import pandas as pd
-
 from cotacao.utils import VATApi
 from cotacao.models import Currency
 
 
 def home(request):
     currencies = Currency.objects.all()
-
     context = {'currencies': currencies}
 
     if request.method == 'POST':
-        if currencies.count() == 0:
-            return HttpResponse('There are no currencies in database')
-        elif not currencies.filter(abbr='USD').exists():
-            return HttpResponse('There is no USD currency in database')
-
         params = request.POST.dict()
 
         required_fields = ['start', 'finish', 'currency']
@@ -42,7 +34,7 @@ def home(request):
 
         date_range = pd.date_range(start=start, end=finish, freq='D')
 
-        api = VATApi()
+        api = VATApi('rates')
 
         data = []
 
