@@ -28,6 +28,8 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = []
 
+VAT_API = config('VAT_API', default='https://api.vatcomply.com')
+
 
 # Application definition
 
