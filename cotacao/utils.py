@@ -1,3 +1,4 @@
+from typing import Literal
 from django.conf import settings
 import pandas as pd
 import requests
@@ -5,12 +6,26 @@ from cotacao.models import Currency, Rate
 
 
 class VATApi:
-    def __init__(self) -> None:
+    def __init__(self, endpoint: Literal['rates'] = 'rates') -> None:
         api = settings.VAT_API
-        self.default_currency = 'USD'
-        self.url = f'{api}/rates/?base={self.default_currency}'
+        self.default_currency = settings.DEFAULT_CURRENCY
+        self.endpoint = endpoint
+        self.url = f'{api}/{endpoint}/?base={self.default_currency}'
 
-    def get_rates_by_date(self, date: pd.Timestamp) -> dict:
+        if not self.check_currency_in_database(self.default_currency):
+            raise ValueError('Default currency not found in database')
+
+    def check_currency_in_database(self, currency: str) -> bool:
+        try:
+            Currency.objects.get(abbr=currency)
+            return True
+        except Currency.DoesNotExist:
+            return False
+
+    def get_rates_by_date(self, date: pd.Timestamp) -> dict[str, float]:
+        if self.endpoint != 'rates':
+            raise ValueError('Endpoint must be "rates"')
+
         response = requests.get(
             self.url,
             params={'date': date.strftime('%Y-%m-%d')}
@@ -19,6 +34,9 @@ class VATApi:
         return response.json()['rates']
 
     def create_rate(self, date: pd.Timestamp, currency: Currency, rate: float) -> Rate:
+        if self.endpoint != 'rates':
+            raise ValueError('Endpoint must be "rates"')
+
         rate = Rate.objects.create(
             date=date,
             base=Currency.objects.get(abbr=self.default_currency),
@@ -27,7 +45,10 @@ class VATApi:
         )
         return rate
 
-    def get_or_create_rate(self, date: pd.Timestamp, currency: Currency) -> Rate:
+    def get_or_create_rate(self, date: pd.Timestamp, currency: Currency) -> tuple[Rate, bool]:
+        if self.endpoint != 'rates':
+            raise ValueError('Endpoint must be "rates"')
+
         try:
             rate = Rate.objects.get(
                 date=date,
@@ -45,7 +66,10 @@ class VATApi:
             created = True
         return rate, created
 
-    def get_or_update_rate(self, date: pd.Timestamp, currency: Currency) -> Rate:
+    def get_or_update_rate(self, date: pd.Timestamp, currency: Currency) -> tuple[Rate, bool]:
+        if self.endpoint != 'rates':
+            raise ValueError('Endpoint must be "rates"')
+
         try:
             rate = Rate.objects.get(
                 date=date,
