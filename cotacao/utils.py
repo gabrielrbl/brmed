@@ -6,14 +6,19 @@ from cotacao.models import Currency, Rate
 
 
 class VATApi:
-    def __init__(self, endpoint: Literal['rates'] = 'rates') -> None:
+    def __init__(self, endpoint: Literal['rates', 'currencies'] = 'rates') -> None:
         api = settings.VAT_API
         self.default_currency = settings.DEFAULT_CURRENCY
         self.endpoint = endpoint
-        self.url = f'{api}/{endpoint}/?base={self.default_currency}'
+        url = f'{api}/{endpoint}'
 
-        if not self.check_currency_in_database(self.default_currency):
-            raise ValueError('Default currency not found in database')
+        if endpoint == 'rates':
+            url += f'/?base={self.default_currency}'
+
+            if not self.check_currency_in_database(self.default_currency):
+                raise ValueError('Default currency not found in database')
+
+        self.url = url
 
     def check_currency_in_database(self, currency: str) -> bool:
         try:
@@ -21,6 +26,15 @@ class VATApi:
             return True
         except Currency.DoesNotExist:
             return False
+
+    def get_curriences(self, currencies: list[str]) -> dict[str, dict[str, str]]:
+        if self.endpoint != 'currencies':
+            raise ValueError('Endpoint must be "currencies"')
+
+        response = requests.get(self.url)
+        response.raise_for_status()
+        return response.json()
+
 
     def get_rates_by_date(self, date: pd.Timestamp) -> dict[str, float]:
         if self.endpoint != 'rates':
