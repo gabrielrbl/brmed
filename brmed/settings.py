@@ -47,7 +47,12 @@ MY_APPS = [
     'cotacao.apps.CotacaoConfig',
 ]
 
+EXTERNAL_APPS = [
+    'rest_framework',
+]
+
 INSTALLED_APPS += MY_APPS
+INSTALLED_APPS += EXTERNAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
