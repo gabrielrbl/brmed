@@ -63,14 +63,12 @@
       <div>
         <span>START:</span>
 
-        <input type="date" name="start" placeholder="dd/mm/yyyy"
-        min="1999-01-04" max={% now "Y-m-d" %} />
+        <input type="date" name="start" placeholder="dd/mm/yyyy" min="1999-01-04" max={% now "Y-m-d" %} value={{ selected_start|date:"Y-m-d" }} />
       </div>
 
       <div>
         <span>FINISH:</span>
-        <input type="date" name="finish" placeholder="dd/mm/yyyy"
-        min="1999-01-04" max={% now "Y-m-d" %} />
+        <input type="date" name="finish" placeholder="dd/mm/yyyy" min="1999-01-04" max={% now "Y-m-d" %} value={{ selected_finish|date:"Y-m-d" }} />
       </div>
 
       <div>
@@ -81,9 +79,11 @@
         <span>TO:</span>
         <select name="currency" required>
           <option value="" selected>SELECT THE CURRENCY</option>
-          {% for currency in currencies %} {% if currency != 'USD' %}
-          <option value="{{ currency.abbr }}">{{ currency }}</option>
-          {% endif %} {% endfor %}
+          {% for currency in currencies %}
+            {% if currency.abbr != default_currency %}
+              <option value="{{ currency.abbr }}" {% if selected_currency == currency %}selected{% endif %}>{{ currency }}</option>
+            {% endif %}
+          {% endfor %}
         </select>
       </div>
 

@@ -1,6 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.conf import settings
 import pandas as pd
 from cotacao.utils import VATApi
 from cotacao.models import Currency, Rate
@@ -9,7 +10,10 @@ from cotacao.serializers import CurrencySerializer, RateSerializer
 
 def home(request):
     currencies = Currency.objects.all()
-    context = {'currencies': currencies}
+    context = {
+        'currencies': currencies,
+        'default_currency': settings.DEFAULT_CURRENCY
+    }
 
     if request.method == 'POST':
         params = request.POST.dict()
@@ -51,6 +55,10 @@ def home(request):
 
         context['to'] = currency
         context['data'] = data
+
+        context['selected_start'] = start
+        context['selected_finish'] = finish
+        context['selected_currency'] = currency
 
     return render(request, 'home.html', context)
 
